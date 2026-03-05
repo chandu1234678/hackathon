@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { applyDarkMode } from '../utils/darkMode'
+import { applyDarkMode, toggleDarkMode } from '../utils/darkMode'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -10,15 +10,26 @@ export default function Dashboard() {
   const [chatMessage, setChatMessage] = useState('')
   const [activeNav, setActiveNav] = useState('dashboard')
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   
   const patientProfile = JSON.parse(localStorage.getItem('patient_profile') || '{}')
-  const userName = patientProfile.full_name || 'John Doe'
+  const userData = JSON.parse(localStorage.getItem('user_data') || '{}')
+  const userName = patientProfile.full_name || userData.full_name || 'John Doe'
+  const patientId = patientProfile.patient_id || userData.patient_id || userData.id || 'PT-2024-001'
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase()
 
-  // Apply dark mode on mount
+  // Apply dark mode on mount - default to light mode
   useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setIsDarkMode(savedDarkMode)
     applyDarkMode()
   }, [])
+
+  const handleDarkModeToggle = () => {
+    const newMode = !isDarkMode
+    setIsDarkMode(newMode)
+    toggleDarkMode(newMode)
+  }
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -181,6 +192,13 @@ export default function Dashboard() {
             </form>
           </div>
           <div className="flex items-center gap-4">
+            <button 
+              onClick={handleDarkModeToggle}
+              className="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+            </button>
             <button className="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
               <span className="material-symbols-outlined">notifications</span>
             </button>
@@ -188,7 +206,7 @@ export default function Dashboard() {
             <div className="relative flex items-center gap-3" ref={profileMenuRef} data-profile-menu>
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-slate-900 dark:text-white">{userName}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Patient ID: #8821</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Patient ID: {patientId}</p>
               </div>
               <button
                 onClick={(e) => {
@@ -212,6 +230,10 @@ export default function Dashboard() {
                   <button onClick={(e) => { e.stopPropagation(); setShowProfileMenu(false); navigate('/account-settings') }} className="w-full px-4 py-2 text-left text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">settings</span>
                     Account
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setShowProfileMenu(false); navigate('/history') }} className="w-full px-4 py-2 text-left text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">history</span>
+                    History
                   </button>
                   <div className="border-t border-slate-200 dark:border-slate-700"></div>
                   <button
@@ -392,11 +414,11 @@ export default function Dashboard() {
               </div>
 
               {/* My Foot Scans Collection */}
-              <div className="bg-primary rounded-xl p-6 text-white overflow-hidden relative group hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer">
+              <div onClick={() => navigate('/history')} className="bg-primary rounded-xl p-6 text-white overflow-hidden relative group hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer">
                 <div className="relative z-10">
                   <h3 className="text-lg font-bold mb-2">My Foot Scans</h3>
                   <p className="text-white/80 text-sm mb-6">View your complete history of 3D and thermal scans.</p>
-                  <button className="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-white/90 transition-colors">
+                  <button onClick={(e) => { e.stopPropagation(); navigate('/history') }} className="inline-flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-white/90 transition-colors">
                     Open Gallery
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </button>

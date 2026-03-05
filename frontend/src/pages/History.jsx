@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { applyDarkMode, toggleDarkMode } from '../utils/darkMode'
 
 // Sample history data - replace with API call to backend
 const sampleHistory = [
@@ -89,6 +90,20 @@ export default function History({ onLogout }) {
   const [filterRisk, setFilterRisk] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState('grid') // grid or list
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Apply dark mode on mount - default to light mode
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setIsDarkMode(savedDarkMode)
+    applyDarkMode()
+  }, [])
+
+  const handleDarkModeToggle = () => {
+    const newMode = !isDarkMode
+    setIsDarkMode(newMode)
+    toggleDarkMode(newMode)
+  }
 
   const filteredHistory = sampleHistory.filter((entry) => {
     const matchesRisk = filterRisk === 'all' || entry.riskLevel === filterRisk
@@ -126,26 +141,33 @@ export default function History({ onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.15),_transparent_45%)]">
+    <div className="min-h-screen bg-light dark:bg-slate-950 text-slate-900 dark:text-white font-display">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
           <button 
             onClick={() => navigate('/dashboard')} 
-            className="text-xl font-extrabold tracking-tight text-slate-900 hover:opacity-80 transition-opacity"
+            className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white hover:opacity-80 transition-opacity"
           >
             MedVision <span className="text-primary">AI</span>
           </button>
           <div className="flex items-center gap-3">
             <button
+              onClick={handleDarkModeToggle}
+              className="size-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+            </button>
+            <button
               onClick={() => navigate('/chatbot')}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               ← Back to Analysis
             </button>
             <button
               onClick={onLogout}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               Logout
             </button>
