@@ -10,10 +10,10 @@ services:
       - ./backend:/app
 
   frontend:
-    build: ./frontend-ai-ui
+    build: ./frontend
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend-ai-ui:/app
+      - ./frontend:/app
     depends_on:
       - backend

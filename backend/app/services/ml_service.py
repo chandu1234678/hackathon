@@ -1,15 +1,10 @@
-import numpy as np
+def run_prediction(text: str) -> tuple[int, float]:
+    length_feature = len(text.strip())
 
-def run_prediction(text: str):
-
-    # simple demo feature
-    length = len(text)
-
-    if length > 10:
+    if length_feature >= 20:
         prediction = 1
-        confidence = 0.85
     else:
         prediction = 0
-        confidence = 0.60
 
-    return prediction, confidence
+    confidence = min(0.99, 0.55 + (length_feature / 100.0))
+    return prediction, round(confidence, 2)

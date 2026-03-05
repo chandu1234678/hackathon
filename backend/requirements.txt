@@ -8,3 +8,5 @@ sqlalchemy
 joblib
 loguru
 python-multipart
+lime
+shap
