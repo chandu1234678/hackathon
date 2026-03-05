@@ -39,6 +39,10 @@ class PredictionLog(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=True)
     prediction = Column(String)
     confidence = Column(Float)
+    risk_score = Column(Float, default=0.0)
+    risk_level = Column(String, default="Low")
+    severity = Column(String, default="None")
+    explanation_text = Column(String, nullable=True)
     image_url = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     

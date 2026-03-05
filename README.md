@@ -1,4 +1,21 @@
-# Diabetic Ulcer Explainable AI Platform
+# 🏥 MedVision AI - Diabetic Ulcer Explainable AI Platform
+
+## 🚀 Quick Start - Servers Running!
+
+**Both servers are currently RUNNING:**
+
+- ✅ **Backend API:** http://localhost:8000 (FastAPI + Uvicorn)
+- ✅ **Frontend:** http://localhost:5173 (React + Vite)
+- ✅ **API Docs:** http://localhost:8000/docs
+- ✅ **Health Check:** http://localhost:8000/health
+
+**Deployment Status:** ✅ **READY TO DEPLOY**
+- Health check endpoints configured for Render/Heroku
+- `render.yaml` Blueprint configuration ready
+- Complete deployment guide in [DEPLOYMENT.md](DEPLOYMENT.md)
+- Application status in [APPLICATION_STATUS.md](APPLICATION_STATUS.md)
+
+---
 
 ## Overview
 
@@ -16,6 +33,14 @@ In addition to predictions, the system generates explanations such as **Grad-CAM
 
 This project was built to explore modern technologies including **FastAPI, PyTorch, React, Docker, MLflow, and Prometheus monitoring**.
 
+**New Features Added:**
+- ✨ Interactive History page with image gallery
+- ✨ Enhanced health check endpoints (5 endpoints for monitoring)
+- ✨ Chatbot workspace with AI assistant
+- ✨ Modern UI with Tailwind CSS
+- ✨ Complete authentication flow (Login/Signup/Password Reset)
+- ✨ Deployment-ready configuration files
+
 ---
 
 # Problem Statement
@@ -32,16 +57,30 @@ This project focuses on **Explainable AI**, providing both predictions and inter
 
 # Features
 
-* Diabetic ulcer detection from foot images
-* Integration of clinical data (age, BMI, diabetes duration, etc.)
-* Explainable AI visualizations
-* Grad-CAM heatmaps for image explanation
-* SHAP feature importance for clinical data
-* Patient timeline tracking and ulcer progression monitoring
-* JWT-based authentication system
-* Cloud image storage
-* Monitoring with Prometheus and Grafana
-* ML experiment tracking using MLflow
+## 🎯 Core AI Capabilities
+* ✅ Diabetic ulcer detection from foot images
+* ✅ Integration of clinical data (age, BMI, diabetes duration, etc.)
+* ✅ Explainable AI visualizations
+* ✅ Grad-CAM heatmaps for image explanation
+* ✅ SHAP feature importance for clinical data
+* ✅ Patient timeline tracking and ulcer progression monitoring
+
+## 💻 Application Features
+* ✅ JWT-based authentication system (Login/Signup/Password Reset)
+* ✅ Interactive chatbot workspace with image upload
+* ✅ History page with filters (Risk level, search, grid/list view)
+* ✅ Real-time AI analysis with confidence scores
+* ✅ Modern responsive UI with Tailwind CSS
+* ✅ Cloud image storage (Cloudinary)
+
+## 🚀 DevOps & Deployment
+* ✅ **5 Health check endpoints** (`/health`, `/health/ping`, `/health/ready`, `/health/live`, `/health/status`)
+* ✅ **Render Blueprint** (`render.yaml`) - Auto-deploy backend + frontend + database
+* ✅ **Heroku/Railway ready** (`Procfile`)
+* ✅ **Docker support** (`docker-compose.yml`)
+* ✅ Monitoring with Prometheus and Grafana
+* ✅ ML experiment tracking using MLflow
+* ✅ System metrics monitoring (CPU, memory, disk)
 
 ---
 
@@ -292,6 +331,128 @@ This project explores several important concepts in modern AI system development
 
 ---
 
+---
+
+# 🏥 Health Check Endpoints (Production Ready)
+
+The backend includes **5 health check endpoints** to keep your application alive on free-tier hosting:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /health` | Main health check - used by Render, Heroku |
+| `GET /health/ping` | Simple uptime ping - for monitoring services |
+| `GET /health/ready` | Readiness probe - Kubernetes compatible |
+| `GET /health/live` | Liveness probe - container orchestration |
+| `GET /health/status` | System metrics - CPU, memory, disk usage |
+
+**Prevent Sleeping on Render (Free Tier):**
+1. Sign up for free [UptimeRobot](https://uptimerobot.com) account
+2. Add HTTP monitor for: `https://your-app.onrender.com/health/ping`
+3. Set interval to 5-14 minutes
+4. Your app stays awake! 🎉
+
+---
+
+# 🌐 Deployment Guide
+
+## Deploy to Render (Recommended)
+
+**Step 1: Push to GitHub**
+```bash
+git add .
+git commit -m "Ready for deployment"
+git push origin main
+```
+
+**Step 2: Deploy with Blueprint**
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click **New** → **Blueprint**
+3. Connect your GitHub repository
+4. Render auto-deploys using `render.yaml`:
+   - Backend API (Python/FastAPI)
+   - Frontend (Static Site)
+   - PostgreSQL Database
+
+**Step 3: Configure Environment Variables**
+Generate secure keys:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Set in Render dashboard:
+- `SECRET_KEY` - Generated secure key
+- `JWT_SECRET_KEY` - Another generated key
+- `ENVIRONMENT` - `production`
+- `CORS_ORIGINS` - Your frontend URL
+
+**Step 4: Set Up Monitoring**
+- Create [UptimeRobot](https://uptimerobot.com) account (free)
+- Monitor `/health/ping` endpoint
+- Prevents app from sleeping!
+
+**📖 Complete Guide:** See [DEPLOYMENT.md](DEPLOYMENT.md) for full instructions including Heroku, Railway, Vercel, Docker.
+
+---
+
+# 📊 Current Application Status
+
+✅ **Backend Server:** Running on port 8000  
+✅ **Frontend Server:** Running on port 5173  
+✅ **Health Endpoints:** Configured and tested  
+✅ **Deployment Files:** render.yaml, Procfile, .env templates  
+✅ **Documentation:** DEPLOYMENT.md, APPLICATION_STATUS.md
+
+**Test Locally:**
+```bash
+# Test health endpoints
+curl http://localhost:8000/health
+curl http://localhost:8000/health/ping
+curl http://localhost:8000/health/status
+
+# Open application
+http://localhost:5173
+```
+
+**API Documentation:**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+---
+
+# 📁 New Files Added
+
+**Deployment Configuration:**
+- `render.yaml` - Render Blueprint (backend + frontend + database)
+- `Procfile` - Heroku/Railway deployment
+- `DEPLOYMENT.md` - Complete deployment guide
+- `APPLICATION_STATUS.md` - Current system status
+
+**Environment Templates:**
+- `backend/.env.example` - Backend environment variables template
+- `frontend/.env.example` - Frontend environment variables template
+- `backend/.env` - Local development configuration (created)
+- `frontend/.env` - Frontend API URL configuration (created)
+
+**Enhanced Backend:**
+- `backend/app/routes/health.py` - 5 health check endpoints
+- `backend/requirements.txt` - Added `psutil` for system monitoring
+
+**New Frontend Pages:**
+- `frontend/src/pages/History.jsx` - Interactive history with filters
+
+---
+
 # License
 
 This project is intended for **educational and research purposes only**.
+
+---
+
+<div align="center">
+
+**🎉 Ready to Deploy! Both servers are running. Follow DEPLOYMENT.md to go live.**
+
+**Built with ❤️ for better healthcare**
+
+</div>
+

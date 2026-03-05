@@ -33,6 +33,10 @@ async def predict(request: PredictionRequest, user: User = Depends(get_current_u
         patient_id=request.patient_id,
         prediction=result["prediction"],
         confidence=result["confidence"],
+        risk_score=result["risk_score"],
+        risk_level=result["risk_level"],
+        severity=result["severity"],
+        explanation_text=result["explanation_text"],
         image_url=request.image_url
     )
     
@@ -44,8 +48,12 @@ async def predict(request: PredictionRequest, user: User = Depends(get_current_u
         severity=result["severity"],
         affected_area=result["affected_area"],
         explanation_text=result["explanation_text"],
+        lime_explanation=result.get("lime_explanation", ""),
         recommendations=result["recommendations"],
-        gradcam_heatmap=result["gradcam_heatmap"],
+        gradcam_heatmap=result.get("gradcam_heatmap"),
+        gradcam_overlay=result.get("gradcam_overlay"),
+        segmentation_mask=result.get("segmentation_mask"),
         shap_importance=result["shap_importance"],
+        lime_importance=result.get("lime_importance"),
         image_url=result["image_url"]
     )

@@ -33,7 +33,7 @@ async def upload_patient_image(patient_id: int, file: UploadFile = File(...), ag
         image_url=image_url,
         prediction=result["prediction"],
         confidence=result["confidence"],
-        ulcer_area=result["ulcer_area"]
+        ulcer_area=result["affected_area"]
     )
     
     return {

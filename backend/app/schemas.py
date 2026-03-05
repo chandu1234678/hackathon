@@ -52,9 +52,13 @@ class PredictionResponse(BaseModel):
     severity: str
     affected_area: float
     explanation_text: str
+    lime_explanation: str = ""
     recommendations: List[str]
-    gradcam_heatmap: List[List[float]]
+    gradcam_heatmap: Optional[List[List[float]]] = None
+    gradcam_overlay: Optional[str] = None
+    segmentation_mask: Optional[List] = None
     shap_importance: dict
+    lime_importance: Optional[dict] = None
     image_url: str
 
 class UlcerImageResponse(BaseModel):
@@ -79,3 +83,12 @@ class PatientProgressionResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+class UserForgotPassword(BaseModel):
+    email: EmailStr
+
+
+class UserResetPassword(BaseModel):
+    token: str
+    new_password: str

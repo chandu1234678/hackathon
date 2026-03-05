@@ -19,8 +19,21 @@ export async function login(payload) {
     return data
   } catch {
     // Fallback for local demo: allow login without backend auth endpoint.
-    return { access_token: 'local-dev-token' }
+    return { 
+      access_token: 'local-dev-token',
+      user: {
+        email: payload.email,
+        full_name: payload.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        role: 'Patient',
+        member_since: 'May 2023'
+      }
+    }
   }
+}
+
+export async function register(payload) {
+  const { data } = await api.post('/auth/register', payload)
+  return data
 }
 
 export async function uploadImage(file) {
@@ -35,5 +48,26 @@ export async function uploadImage(file) {
 
 export async function predict(payload) {
   const { data } = await api.post('/predict', payload)
+  return data
+}
+
+export async function getCurrentUser() {
+  try {
+    const { data } = await api.get('/auth/me')
+    return data
+  } catch {
+    // Return stored user data if API fails
+    const storedUser = localStorage.getItem('user_data')
+    return storedUser ? JSON.parse(storedUser) : null
+  }
+}
+
+export async function requestPasswordReset(payload) {
+  const { data } = await api.post('/auth/forgot-password', payload)
+  return data
+}
+
+export async function resetPassword(payload) {
+  const { data } = await api.post('/auth/reset-password', payload)
   return data
 }

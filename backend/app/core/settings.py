@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     app_name: str = "Diabetic Ulcer AI System"
     app_version: str = "1.0.0"
     log_level: str = "INFO"
+    environment: str = "development"
+    
+    # Frontend
+    frontend_url: str = "http://localhost:3000"
     
     # Database
     database_url: str = "postgresql://localhost:5432/diabetic_ulcer_db"

@@ -23,7 +23,7 @@ def get_dashboard_stats(user: User = Depends(get_current_user), db: Session = De
     
     # Count patients
     total_patients = db.query(Patient).filter(
-        Patient.doctor_id == user.id
+        Patient.user_id == user.id
     ).count()
     
     # Detection statistics
@@ -82,7 +82,7 @@ def get_patient_analysis_history(
     
     patient = db.query(Patient).filter(
         Patient.id == patient_id,
-        Patient.doctor_id == user.id
+        Patient.user_id == user.id
     ).first()
     
     if not patient:
@@ -95,7 +95,7 @@ def get_patient_analysis_history(
     
     return {
         "patient_id": patient_id,
-        "patient_name": patient.name,
+        "patient_name": patient.patient_identifier,
         "total_analyses": len(predictions),
         "analyses": [
             {

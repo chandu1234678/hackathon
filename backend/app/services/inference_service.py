@@ -1,11 +1,16 @@
 import torch
 import numpy as np
-from app.services.model_loader import get_model
+from app.services.model_loader import get_model, get_segmentation_model
 from app.ml.preprocess import preprocess_image, preprocess_clinical_data
 from app.ml.ulcer_area_estimator import estimate_ulcer_area
 from app.explainability.gradcam import generate_gradcam
 from app.explainability.shap_explainer import generate_shap_values
+from app.explainability.lime_explainer import generate_lime_explanation
+from app.explainability.heatmap_renderer import render_heatmap_overlay
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_risk_score(confidence, age, bmi, diabetes_duration, infection_signs, ulcer_area):
@@ -167,30 +172,59 @@ def run_inference(image_url: str, age: int, bmi: float, diabetes_duration: int, 
 
     prediction = "ulcer" if confidence > 0.5 else "normal"
 
-    # GradCAM
+    # GradCAM heatmap (raw)
+    gradcam_heatmap_raw = None
+    gradcam_overlay_base64 = None
     try:
-        gradcam_heatmap = generate_gradcam(cnn_model, image_tensor)
+        gradcam_heatmap_raw = generate_gradcam(cnn_model, image_tensor)
+        # Create overlay image
+        gradcam_overlay_base64 = render_heatmap_overlay(image_url, gradcam_heatmap_raw)
     except Exception as e:
-        print(f"GradCAM failed: {e}")
-        gradcam_heatmap = [[0.0] * 224 for _ in range(224)]
+        logger.warning(f"GradCAM failed: {e}")
+        gradcam_heatmap_raw = [[0.0] * 224 for _ in range(224)]
+        gradcam_overlay_base64 = None
+
+    # Segmentation model (if prediction is ulcer)
+    segmentation_mask = None
+    if prediction == "ulcer":
+        try:
+            seg_model = get_segmentation_model()
+            if seg_model is not None:
+                with torch.no_grad():
+                    seg_output = seg_model(image_tensor)
+                    segmentation_mask = seg_output.cpu().numpy()
+                logger.info("Segmentation mask computed successfully")
+        except Exception as e:
+            logger.warning(f"Segmentation model failed: {e}")
 
     # SHAP — pass image_features so multimodal model can be used
     feature_names = ["Age", "BMI", "Diabetes Duration", "Infection Signs"]
+    shap_importance = {}
     try:
         shap_importance = generate_shap_values(
             multimodal_model, clinical_tensor.cpu().numpy(), feature_names,
             image_features=image_features.cpu()
         )
     except Exception as e:
-        print(f"SHAP failed: {e}")
+        logger.warning(f"SHAP failed: {e}")
         shap_importance = {n: 0.25 for n in feature_names}
 
+    # LIME explanation (based on clinical features)
+    lime_result = None
+    try:
+        lime_result = generate_lime_explanation(
+            clinical_tensor.cpu().numpy(), prediction, confidence, feature_names
+        )
+    except Exception as e:
+        logger.warning(f"LIME explanation failed: {e}")
+        lime_result = {"explanation": "LIME analysis unavailable", "lime_importance": {}}
+
     # Ulcer area
+    ulcer_area = 0.0
     try:
         ulcer_area = estimate_ulcer_area(image_url)
     except Exception as e:
-        print(f"Ulcer area estimation failed: {e}")
-        ulcer_area = 0.0
+        logger.warning(f"Ulcer area estimation failed: {e}")
 
     # Risk assessment
     risk_score = calculate_risk_score(confidence, age, bmi, diabetes_duration, infection_signs, ulcer_area)
@@ -215,9 +249,14 @@ def run_inference(image_url: str, age: int, bmi: float, diabetes_duration: int, 
         "severity": severity,
         "affected_area": ulcer_area,
         "explanation_text": explanation_text,
+        "lime_explanation": lime_result.get("explanation", "") if lime_result else "",
         "recommendations": recommendations,
-        "gradcam_heatmap": gradcam_heatmap,
+        "gradcam_heatmap": gradcam_heatmap_raw,
+        "gradcam_overlay": gradcam_overlay_base64,
+        "segmentation_mask": segmentation_mask.tolist() if segmentation_mask is not None else None,
         "shap_importance": shap_importance,
+        "lime_importance": lime_result.get("lime_importance", {}) if lime_result else {},
         "image_url": image_url,
         "inference_time": inference_time
     }
+

@@ -1,0 +1,301 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+export default function FootScanAnalysis() {
+  const navigate = useNavigate()
+  const [uploadedImage, setUploadedImage] = useState(null)
+  const [previewImage, setPreviewImage] = useState(null)
+  const [activeNav, setActiveNav] = useState('scan')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+  const handleFileUpload = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setUploadedImage(file)
+        setPreviewImage(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDragDrop = (e) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    handleFileUpload(file)
+  }
+
+  const handleBrowseClick = () => {
+    const input = document.getElementById('file-input')
+    input?.click()
+  }
+
+  const handleStartAnalysis = () => {
+    if (uploadedImage && previewImage) {
+      setIsAnalyzing(true)
+      // Simulate analysis and redirect to results
+      setTimeout(() => {
+        setIsAnalyzing(false)
+        navigate('/scan-results', {
+          state: { previewImage }
+        })
+      }, 2000)
+    }
+  }
+
+  const patientProfile = JSON.parse(localStorage.getItem('patient_profile') || '{}')
+  const userName = patientProfile.full_name || 'Alex Johnson'
+
+  return (
+    <div className="min-h-screen flex flex-col bg-light">
+      {/* Top Navigation */}
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white backdrop-blur-md">
+        <div className="flex h-16 items-center justify-between px-4 lg:px-8">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-white">
+              <span className="material-symbols-outlined">health_metrics</span>
+            </div>
+            <h1 className="text-xl font-bold tracking-tight">MedVision AI</h1>
+          </button>
+          <div className="flex items-center gap-3">
+            <button className="flex size-10 items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
+              <span className="material-symbols-outlined text-slate-600">notifications</span>
+            </button>
+            <div className="h-8 w-px bg-slate-200"></div>
+            <div className="flex items-center gap-3 pl-2">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-slate-900">{userName}</p>
+                <p className="text-xs text-slate-500">Premium Member</p>
+              </div>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="size-10 rounded-full border-2 border-primary/20 hover:border-primary/50 overflow-hidden flex items-center justify-center bg-slate-200"
+              >
+                <img
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgKFZ3-0WTUhN7tWkpJxVUxE3Bv8oIKMLrHqq30LW_R1rbpXUI8QFBeI1pHpJbeGwnbT0Gue3XNusn-dFKRq3VDRU9VW_OO87v6PJZ5uE-SxnhujWj6g3-pttFOUt9WhkLCV14lzJX0r25oFF-K2NjHcO4tCInRzCEUfJ-iGVG5UsurmaSyFl1mx47tvyy205CFHyy4chetFNBM746uuSo80k76MRH5Jpjrgyz9zZiWR3qvyZvIZf9WBGkeeSKEcq5jJZ1tGlS3D0"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 min-h-[calc(100vh-4rem)]">
+        {/* Sidebar */}
+        <aside className="hidden lg:flex w-64 flex-col border-r border-slate-200 bg-white p-6">
+          <nav className="flex flex-col gap-2">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all text-left"
+            >
+              <span className="material-symbols-outlined">dashboard</span>
+              <span className="font-medium">Dashboard</span>
+            </button>
+            <button
+              onClick={() => setActiveNav('scan')}
+              className="flex items-center gap-3 rounded-lg px-4 py-3 bg-primary/10 text-primary transition-all text-left"
+            >
+              <span className="material-symbols-outlined">camera</span>
+              <span className="font-medium">New Analysis</span>
+            </button>
+            <button className="flex items-center gap-3 rounded-lg px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all text-left">
+              <span className="material-symbols-outlined">history</span>
+              <span className="font-medium">History</span>
+            </button>
+            <button className="flex items-center gap-3 rounded-lg px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all text-left">
+              <span className="material-symbols-outlined">medical_information</span>
+              <span className="font-medium">Records</span>
+            </button>
+            <div className="my-4 h-px bg-slate-200"></div>
+            <button className="flex items-center gap-3 rounded-lg px-4 py-3 text-slate-600 hover:bg-slate-100 transition-all text-left">
+              <span className="material-symbols-outlined">settings</span>
+              <span className="font-medium">Settings</span>
+            </button>
+          </nav>
+          <div className="mt-auto rounded-2xl bg-slate-50 p-4 border border-slate-200">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Health Tip</p>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">Regular foot checks can help detect early signs of vascular issues.</p>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8 text-center lg:text-left">
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-slate-900">Upload Foot Image</h2>
+              <p className="mt-3 text-lg text-slate-600">Get an instant AI-powered preliminary assessment of your foot health.</p>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-12">
+              {/* Uploader Section */}
+              <div className="lg:col-span-8">
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDragDrop}
+                  className="rounded-xl border-2 border-dashed border-primary/30 bg-white p-12 transition-all hover:border-primary/60 hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                >
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <span className="material-symbols-outlined text-4xl">cloud_upload</span>
+                    </div>
+                    <h3 className="mb-2 text-xl font-bold text-slate-900">Drag and drop your image</h3>
+                    <p className="mb-8 text-slate-500">Supports JPG, PNG (Max 10MB)</p>
+                    <button
+                      onClick={handleBrowseClick}
+                      className="rounded-full bg-primary px-8 py-3 font-bold text-white shadow-lg shadow-primary/30 transition-transform hover:bg-primary/90 active:scale-95"
+                    >
+                      Browse Files
+                    </button>
+                    <input
+                      id="file-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                    />
+                  </div>
+                </div>
+
+                {/* Analysis Instructions */}
+                <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm border border-slate-200">
+                    <span className="material-symbols-outlined text-primary">light_mode</span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Good Lighting</p>
+                      <p className="text-xs text-slate-500">Ensure area is well-lit</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm border border-slate-200">
+                    <span className="material-symbols-outlined text-primary">center_focus_strong</span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Clear Focus</p>
+                      <p className="text-xs text-slate-500">Keep camera steady</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm border border-slate-200">
+                    <span className="material-symbols-outlined text-primary">straighten</span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Angle</p>
+                      <p className="text-xs text-slate-500">Top or side views</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview Section */}
+              <div className="lg:col-span-4">
+                <div className="sticky top-24 space-y-6">
+                  <div className="rounded-xl bg-white p-4 shadow-lg ring-1 ring-slate-200">
+                    <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-500">Preview</h4>
+                    <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
+                      {previewImage ? (
+                        <div>
+                          <img
+                            alt="Uploaded foot scan"
+                            className="h-full w-full object-cover"
+                            src={previewImage}
+                          />
+                          <p className="absolute bottom-2 left-2 right-2 text-xs font-bold text-white bg-slate-900/70 px-2 py-1 rounded truncate">
+                            {uploadedImage?.name || 'Image uploaded'}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <p className="text-sm text-slate-400">No image uploaded</p>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleStartAnalysis}
+                      disabled={!uploadedImage || isAnalyzing}
+                      className="mt-6 w-full rounded-xl bg-primary py-4 font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
+                    </button>
+                    <p className="mt-3 text-center text-xs text-slate-400">
+                      By clicking "Start Analysis", you agree to our <a className="underline hover:text-primary transition-colors" href="#">Terms of Service</a>.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                    <div className="flex gap-3 text-primary">
+                      <span className="material-symbols-outlined">info</span>
+                      <p className="text-xs font-medium leading-relaxed">
+                        Your data is encrypted. We do not store identifiable biometric data unless you choose to save it to your records.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-md">
+        <div className="flex items-center justify-around p-2 pb-6">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-900 transition-colors"
+          >
+            <span className="material-symbols-outlined">home</span>
+            <span className="text-[10px] font-bold">Home</span>
+          </button>
+          <button
+            onClick={() => setActiveNav('scan')}
+            className="flex flex-col items-center gap-1 p-2 text-primary"
+          >
+            <span className="material-symbols-outlined">camera</span>
+            <span className="text-[10px] font-bold">Scan</span>
+          </button>
+          <button className="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-900 transition-colors">
+            <span className="material-symbols-outlined">history</span>
+            <span className="text-[10px] font-bold">History</span>
+          </button>
+          <button className="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-900 transition-colors">
+            <span className="material-symbols-outlined">person</span>
+            <span className="text-[10px] font-bold">Profile</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 bg-white py-12 px-4 lg:px-8 mb-20 lg:mb-0">
+        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-primary">health_metrics</span>
+              <span className="text-lg font-bold text-slate-900">MedVision AI</span>
+            </div>
+            <p className="text-slate-500 max-w-sm">
+              Advanced podiatry analysis powered by artificial intelligence. Supporting your mobility through proactive screening.
+            </p>
+          </div>
+          <div>
+            <h5 className="font-bold mb-4 text-slate-900">Resources</h5>
+            <ul className="space-y-2 text-sm text-slate-500">
+              <li><a className="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+              <li><a className="hover:text-primary transition-colors" href="#">How it Works</a></li>
+              <li><a className="hover:text-primary transition-colors" href="#">Help Center</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-bold mb-4 text-slate-900">Support</h5>
+            <ul className="space-y-2 text-sm text-slate-500">
+              <li><a className="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+              <li><a className="hover:text-primary transition-colors" href="#">Feedback</a></li>
+              <li><a className="hover:text-primary transition-colors" href="#">Accessibility</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl mt-12 pt-8 border-t border-slate-100 text-center text-xs text-slate-400">
+          <p>© 2024 MedVision AI. This tool is for screening purposes and not a substitute for professional medical advice.</p>
+        </div>
+      </footer>
+    </div>
+  )
+}

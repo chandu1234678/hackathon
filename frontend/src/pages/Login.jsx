@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../services/api'
+import { applyDarkMode } from '../utils/darkMode'
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate()
@@ -8,6 +9,13 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  // Apply dark mode on mount
+  useEffect(() => {
+    applyDarkMode()
+  }, [])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -17,55 +25,146 @@ export default function Login({ onLogin }) {
     try {
       const data = await login({ email, password })
       localStorage.setItem('access_token', data.access_token || 'local-dev-token')
+      
+      // Store user data
+      if (data.user) {
+        localStorage.setItem('user_data', JSON.stringify(data.user))
+      }
+      
+      if (rememberMe) {
+        localStorage.setItem('remember_email', email)
+      } else {
+        localStorage.removeItem('remember_email')
+      }
       onLogin()
       navigate('/chatbot', { replace: true })
     } catch {
-      setError('Unable to login. Please check credentials and try again.')
+      setError('Unable to sign in. Please check your credentials.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-white to-indigo-100 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/70 bg-white p-8 shadow-xl">
-        <h1 className="text-3xl font-extrabold text-slate-900">MedVision AI</h1>
-        <p className="mt-1 text-sm text-slate-500">Sign in to continue to chatbot workspace.</p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-primary"
-            />
+    <div className="min-h-screen bg-background-light dark:bg-slate-900 font-display text-slate-900 dark:text-white flex flex-col">
+      <main className="flex-grow flex items-center justify-center bg-gradient-to-br from-primary/10 via-background-light dark:from-slate-900 dark:via-slate-800 to-primary/5 dark:to-slate-900 p-4">
+        <div className="w-full max-w-md overflow-hidden rounded-xl border border-primary/10 bg-white dark:bg-slate-800 shadow-xl shadow-primary/5 dark:shadow-slate-900/30">
+          <div className="p-8 text-center">
+            <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <span className="material-symbols-outlined text-4xl text-primary">medical_services</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome Back</h2>
+            <p className="mt-2 text-slate-500 dark:text-slate-400">Sign in to your account to continue</p>
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-primary"
-            />
+          <form onSubmit={handleSubmit} className="space-y-5 px-8 pb-8 pt-2">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Email Address</label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-400">mail</span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-background-light py-3.5 pl-12 pr-4 text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/50"
+                  placeholder="maihame@example.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-400">lock</span>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-background-light py-3.5 pl-12 pr-12 text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/50"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-primary"
+                >
+                  <span className="material-symbols-outlined text-xl">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="group flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm text-slate-600 transition-colors group-hover:text-slate-900">Remember me</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-4 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span>{loading ? 'Signing In...' : 'Sign In'}</span>
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+
+            <div className="relative flex items-center py-4">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="mx-4 flex-shrink text-xs font-medium uppercase tracking-widest text-slate-400">New User?</span>
+              <div className="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/signup')}
+              className="w-full rounded-lg border border-slate-200 bg-white py-3.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Create an account
+            </button>
+          </form>
+
+          <div className="border-t border-slate-100 bg-slate-50 px-8 py-6 text-center">
+            <p className="flex items-center justify-center gap-1 text-xs text-slate-500">
+              <span className="material-symbols-outlined text-sm">verified_user</span>
+              Secure, encrypted medical environment
+            </p>
           </div>
+        </div>
+      </main>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary py-2.5 font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {loading ? 'Signing in...' : 'Login'}
-          </button>
-        </form>
-      </div>
+      <footer className="px-4 py-8 text-center">
+        <div className="mx-auto max-w-4xl">
+          <p className="mb-4 text-sm font-medium text-slate-600">
+            Medical AI Assistant | AI-powered foot ulcer detection platform
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-400">
+            <a className="underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary" href="#">Privacy Policy</a>
+            <a className="underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary" href="#">Terms of Service</a>
+            <a className="underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary" href="#">Support</a>
+            <a className="underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary" href="#">Cookie Settings</a>
+          </div>
+          <p className="mt-6 text-[10px] uppercase tracking-tighter text-slate-400">
+            © 2024 AI Foot Ulcer Detection. All Rights Reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }

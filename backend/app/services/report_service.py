@@ -26,12 +26,16 @@ def generate_prediction_report(db: Session, user_id: int, patient_id: int = None
     
     return report
 
-def save_prediction_log(db: Session, user_id: int, patient_id: int = None, prediction: str = "", confidence: float = 0, image_url: str = ""):
+def save_prediction_log(db: Session, user_id: int, patient_id: int = None, prediction: str = "", confidence: float = 0, risk_score: float = 0, risk_level: str = "Low", severity: str = "None", explanation_text: str = "", image_url: str = ""):
     log = PredictionLog(
         user_id=user_id,
         patient_id=patient_id,
         prediction=prediction,
         confidence=confidence,
+        risk_score=risk_score,
+        risk_level=risk_level,
+        severity=severity,
+        explanation_text=explanation_text,
         image_url=image_url
     )
     db.add(log)
