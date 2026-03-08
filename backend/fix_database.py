@@ -119,16 +119,20 @@ def clean_users():
         logger.error(f"✗ Error during cleanup: {e}")
 
 
-def reset_database():
+def reset_database(force=False):
     """DANGEROUS: Drop all tables and recreate schema."""
     logger.info("=" * 60)
     logger.warning("WARNING: THIS WILL DELETE ALL DATA!")
     logger.info("=" * 60)
     
-    confirm = input("Type 'RESET' to confirm database reset: ").strip()
-    if confirm != "RESET":
-        logger.info("❌ Reset cancelled")
-        return
+    if not force:
+        confirm = input("Type 'RESET' to confirm database reset: ").strip()
+        if confirm != "RESET":
+            logger.info("❌ Reset cancelled")
+            return
+    else:
+        logger.info("Force flag set - proceeding with reset")
+
     
     try:
         logger.info("Dropping all tables...")
@@ -162,6 +166,7 @@ def main():
     parser.add_argument("--list-users", action="store_true", help="List all users")
     parser.add_argument("--clean-users", action="store_true", help="Remove test users")
     parser.add_argument("--reset", action="store_true", help="Reset database (DANGER!)")
+    parser.add_argument("--force", action="store_true", help="Force reset without confirmation (DANGEROUS!)")
     
     args = parser.parse_args()
     
@@ -179,7 +184,7 @@ def main():
         clean_users()
     
     if args.reset:
-        reset_database()
+        reset_database(force=args.force)
 
 
 if __name__ == "__main__":

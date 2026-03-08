@@ -10,7 +10,27 @@ Usage:
 import os
 import sys
 import argparse
+from pathlib import Path
 from urllib.parse import urlparse
+
+# Load .env file first
+try:
+    from dotenv import load_dotenv
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        load_dotenv(env_file)
+        print(f"✓ Loaded environment from {env_file}")
+except ImportError:
+    # Try manual loading if dotenv not available
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    os.environ[key.strip()] = value.strip()
+        print(f"✓ Loaded environment from {env_file}")
 
 def get_database_url():
     """Get DATABASE_URL from environment variable."""
