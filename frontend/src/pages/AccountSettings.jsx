@@ -143,6 +143,10 @@ export default function AccountSettings({ onLogout }) {
     navigate('/login', { replace: true })
   }
 
+  const handleCancel = () => {
+    navigate('/dashboard')
+  }
+
   const handleSaveMetrics = async () => {
     setMetricsError('')
     setMetricsSuccess('')
