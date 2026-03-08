@@ -13,125 +13,31 @@ import ChatbotWorkspace from './pages/ChatbotWorkspace'
 import History from './pages/History'
 
 function ProtectedRoute({ isAuthenticated, children }) {
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+  // No login restriction: always render children
   return children
 }
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem('access_token')),
-  )
-
-  const authApi = useMemo(
-    () => ({
-      login: () => setIsAuthenticated(true),
-      logout: () => {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('user_data')
-        localStorage.removeItem('patient_profile')
-        setIsAuthenticated(false)
-      },
-    }),
-    [],
-  )
-
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Login onLogin={authApi.login} />
-          )
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <ForgotPassword />
-          )
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Signup onLogin={authApi.login} />
-          )
-        }
-      />
-      <Route
-        path="/reset-password"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <ResetPassword />
-          )
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Dashboard onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/foot-scan-analysis"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <FootScanAnalysis onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/scan-results"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ScanResults onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/health-metrics-results"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <HealthMetricsResults onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/account-settings"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <AccountSettings onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/chatbot"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ChatbotWorkspace onLogout={authApi.logout} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/history"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <History onLogout={authApi.logout} />
+      <Route path="/login" element={<Login onLogin={authApi.login} />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/signup" element={<Signup onLogin={authApi.login} />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/dashboard" element={<Dashboard onLogout={authApi.logout} />} />
+      <Route path="/foot-scan-analysis" element={<FootScanAnalysis onLogout={authApi.logout} />} />
+      <Route path="/scan-results" element={<ScanResults onLogout={authApi.logout} />} />
+      <Route path="/health-metrics-results" element={<HealthMetricsResults onLogout={authApi.logout} />} />
+      <Route path="/account-settings" element={<AccountSettings onLogout={authApi.logout} />} />
+      <Route path="/chatbot" element={<ChatbotWorkspace onLogout={authApi.logout} />} />
+      <Route path="/history" element={<History onLogout={authApi.logout} />} />
+      <Route path="/image-analysis" element={<Navigate to="/chatbot" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  )
           </ProtectedRoute>
         }
       />

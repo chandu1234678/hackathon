@@ -297,6 +297,13 @@ export default function Signup({ onLogin }) {
                   Log In
                 </button>
               </p>
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="w-full mt-4 rounded-lg border border-slate-200 bg-white py-3.5 font-semibold text-primary transition-all hover:bg-primary/10 hover:border-primary active:scale-95"
+              >
+                Back to Dashboard
+              </button>
             </div>
           </div>
 
