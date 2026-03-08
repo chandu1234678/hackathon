@@ -3,7 +3,8 @@
 ## Your Problem
 - ❌ "Email already registered" when creating account
 - ❌ "Invalid credentials" when trying to login
-- ✅ System is deployed on Render but database is corrupted
+- ✅ Using external PostgreSQL database (not Render managed)
+- ✅ DATABASE_URL set as environment variable
 
 ---
 
@@ -37,46 +38,66 @@ https://medvision-backend.onrender.com/diagnostics/check-email/YOUR_EMAIL
 
 ## Nuclear Option: Reset Database
 
-### Via Render Shell (FASTEST)
-
-1. Go to: https://dashboard.render.com
-2. Click on **medvision-db** (PostgreSQL service)
-3. Click **"Shell"** button  
-4. Run this command:
-   ```sql
-   psql $DATABASE_URL
-   ```
-5. In the `psql>` prompt, run:
-   ```sql
-   DELETE FROM users;
-   DELETE FROM patients;
-   DELETE FROM prediction_logs;
-   DELETE FROM ulcer_images;
-   DELETE FROM health_metrics;
-   \q
-   ```
-6. Go to **medvision-backend** service
-7. Click **"Manual Deploy"** > select latest
-8. Wait for deployment to complete
-9. **Try creating account again!**
-
-### Via Python Script (Local)
+### Option 1: Via Python Script (FASTEST - LOCAL)
 
 ```bash
 # From your computer terminal
 cd backend
 
-# Option 1: Clean test users only
-python fix_database.py --clean-users
+# Activate environment
+venv\Scripts\activate
 
-# Option 2: Nuclear reset (deletes everything!)
+# Run reset
 python fix_database.py --reset
 
-# Then commit and push:
+# When prompted, type: RESET (to confirm)
+# All data will be deleted
+```
+
+Then deploy to Render:
+```bash
 git add -A
-git commit -m "Database reset - cleaned test users"
+git commit -m "Database reset - cleaning old test data"
 git push
 ```
+
+### Option 2: Via PostgreSQL Client (Direct)
+
+If you have `psql` installed locally:
+
+```bash
+# Find your DATABASE_URL in Render > medvision-backend > Environment
+# It looks like: postgresql://user:pass@host:5432/dbname
+
+# Connect directly to your external database
+psql "postgresql://user:password@your-db-host:5432/your-db-name"
+
+# In psql prompt, run:
+DELETE FROM users CASCADE;
+DELETE FROM patients CASCADE;
+DELETE FROM prediction_logs CASCADE;
+DELETE FROM ulcer_images CASCADE;
+DELETE FROM health_metrics CASCADE;
+
+# Exit
+\q
+```
+
+Then deploy new version:
+```bash
+git add -A
+git commit -m "Database reset - cleaned test data"
+git push
+```
+
+### Option 3: Via pgAdmin (GUI)
+
+If you have pgAdmin installed:
+
+1. Create connection to your external PostgreSQL
+2. Right-click **users** table > **Delete/Truncate**
+3. Repeat for: patients, prediction_logs, ulcer_images, health_metrics
+4. Refresh Render deployment
 
 ---
 
