@@ -11,10 +11,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: medvision-db
-          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: ENVIRONMENT
@@ -35,14 +31,7 @@ services:
     staticPublishPath: frontend/dist
     plan: free
     envVars:
-      - key: VITE_API_URL
+      - key: VITE_API_BASE_URL
         value: https://medvision-ai-backend.onrender.com
       - key: NODE_VERSION
         value: "18.0.0"
-
-# Database
-databases:
-  - name: medvision-db
-    databaseName: medvision_production
-    plan: free
-    region: oregon
